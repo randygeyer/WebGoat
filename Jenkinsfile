@@ -17,7 +17,7 @@ pipeline {
     
     stage('Build') {
       steps {
-        sh 'mvn tomcat:run-war clean package'
+        sh 'mvn clean package'
       }
     }
     
