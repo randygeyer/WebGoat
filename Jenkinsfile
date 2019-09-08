@@ -24,7 +24,7 @@ pipeline {
     stage('Deploy-to-Tomcat') {
       steps {
         sshagent(['prod']) {
-          sh 'scp -o StrictHostKeyChecking=no target/*.war ubuntu@50.112.150.134:/prod/apache-tomcat-8.5.45/webapps/webapp.war'
+          sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/cardiff-secure-cicd-pipeline/webgoat-container/target/*.war ubuntu@50.112.150.134:/prod/apache-tomcat-8.5.45/webapps/webapp.war'
         }
       }
     }
