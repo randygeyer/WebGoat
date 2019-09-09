@@ -5,24 +5,14 @@ pipeline {
     maven 'Maven'
   }
   
-  stages {
-    stage('Environment Variables') {
-      steps {
-        sh '''
-          echo "PATH=${PATH}"
-          echo "M2_HOME=${M2_HOME}"
-          '''
-      }
-    } 
-
-    stage ('secrets') {
+    stage ('Secrets') {
       steps {
         sh 'rm trufflehog | true'
         sh 'docker run gesellix/trufflehog --json https://github.com/cmarcond/WebGoat-1.git > trufflehog'
         sh 'cat trufflehog'
       }
     }
-    
+
     stage('Build') {
       steps {
         sh 'mvn clean package'
