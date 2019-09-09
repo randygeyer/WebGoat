@@ -5,6 +5,8 @@ pipeline {
     maven 'Maven'
   }
   
+  stages {
+      
     stage ('Secrets') {
       steps {
         sh 'rm trufflehog | true'
