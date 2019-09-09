@@ -7,7 +7,7 @@ pipeline {
   
   stages {
       
-    stage ('Secrets') {
+    stage ('SECRETS') {
       steps {
         sh 'rm trufflehog | true'
         sh 'docker run gesellix/trufflehog --json https://github.com/cmarcond/WebGoat-1.git > trufflehog'
@@ -15,7 +15,7 @@ pipeline {
       }
     }
 
-    stage ('OAST') {
+    stage ('SAST OWASP') {
       steps {
         sh 'rm owasp | true'
         sh 'wget "https://raw.githubusercontent.com/cmarcond/WebGoat-1/master/owasp-dependency-check.sh"'
@@ -24,13 +24,23 @@ pipeline {
       }
     }
 
-    stage('Build') {
+    stage ('SAST SONAQUBE') {
+      steps {
+        withSonarQubeEnv('sonarqube') {
+          sh 'mvn sonar:sonar'
+          sh 'cat target/sonar/report-task.txt'
+        }
+      }
+    }
+
+
+    stage('BUILD') {
       steps {
         sh 'mvn clean package'
       }
     }
     
-    stage('Deploy Prod') {
+    stage('DEPLOY PROD') {
       steps {
         sshagent(['prod']) {
           sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/cardiff-secure-cicd-pipeline/webgoat-container/target/*.war ubuntu@34.210.33.150:/prod/apache-tomcat-8.5.45/webapps/webapp.war'
