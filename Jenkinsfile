@@ -50,12 +50,30 @@ pipeline {
       }
     }
 
-    stage('DAST') { 
+    stage('DAST ZAP') { 
       steps {
 	sh 'docker run -t owasp/zap2docker-stable zap-baseline.py -t http://34.210.33.150:8080/webapp/ || true'
       }
     }
-    
+	  
+    stage('DAST NIKTO') { 
+      steps {
+	sh 'docker run --user $(id -u):$(id -g) --rm -v $(pwd):/report -i secfigo/nikto:latest -h 34.210.33.150 -port 8080 -output /report/nikto-output.xml'
+      }
+    }
+	  
+    stage('DAST SSLSCAN') { 
+      steps {
+	sh 'sslyze --regular 34.210.33.150 --json_out sslyze-output.json'
+      }
+    }
+	  
+    stage('DAST NMAP') { 
+      steps {
+	sh 'nmap 34.210.33.150 -oX nmap.xml'
+      }
+    }
+
   }
   
 }
