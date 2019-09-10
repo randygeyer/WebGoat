@@ -64,7 +64,7 @@ pipeline {
 	  
     stage('DAST SSLSCAN') { 
       steps {
-	sh 'docker run --rm -it nablac0d3/sslyze --regular www.github.com:443'
+	sh 'docker run --rm -t nablac0d3/sslyze --regular www.github.com:443'
       }
     }
 	  
