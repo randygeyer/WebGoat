@@ -40,10 +40,12 @@ pipeline {
       }
     }
     
-    stage('DEPLOY PROD') {
+    stage('DEPLOY QA') {
       steps {
         sshagent(['prod']) {
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "sudo bash /prod/apache-tomcat-8.5.45/bin/shutdown.sh"
           sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/cardiff-secure-cicd-pipeline/webgoat-container/target/*.war ubuntu@34.210.33.150:/prod/apache-tomcat-8.5.45/webapps/webapp.war'
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "sudo bash /prod/apache-tomcat-8.5.45/bin/startup.sh"
         }
       }
     }
