@@ -17,7 +17,7 @@ pipeline {
 
     stage ('SAST OWASP') {
       steps {
-        sh 'rm owasp | true'
+        sh 'rm owasp-dependency-check.sh* || true'
         sh 'wget "https://raw.githubusercontent.com/cmarcond/WebGoat-1/master/owasp-dependency-check.sh"'
         sh 'chmod +x owasp-dependency-check.sh'
         sh 'bash owasp-dependency-check.sh'
@@ -52,8 +52,8 @@ pipeline {
 
     stage('DAST') { 
       steps {
-		    sh 'docker run -t owasp/zap2docker-stable zap-baseline.py -t http://34.210.33.150:8080/webapp/'
-	    }
+	sh 'docker run -t owasp/zap2docker-stable zap-baseline.py -t http://34.210.33.150:8080/webapp/ || true'
+      }
     }
     
   }
