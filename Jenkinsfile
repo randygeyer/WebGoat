@@ -23,7 +23,7 @@ pipeline {
         sh 'bash owasp-dependency-check.sh'
       }
     }
-
+	  
     stage ('SAST SONAQUBE') {
       steps {
         withSonarQubeEnv('sonarqube') {
@@ -33,13 +33,16 @@ pipeline {
       }
     }
 
-
     stage('BUILD') {
       steps {
         sh 'mvn clean package'
       }
     }
-    
+
+    stage('Deploy approval'){
+      input "Deploy to QA?"
+    }
+  
     stage('DEPLOY QA') {
       steps {
         sshagent(['prod']) {
@@ -74,13 +77,13 @@ pipeline {
       }
     }
 
-    stage('HARDENING CONFORMANCE INSPEC') { 
+    stage('HARDENING COMPLIANCE INSPEC') { 
       steps {
-	sh 'inspec exec https://github.com/dev-sec/linux-baseline -t ssh://ubuntu@34.210.33.150 -i /tmp/pipeline.pem --chef-license=accept'
+	sh 'inspec exec https://github.com/dev-sec/linux-baseline -t ssh://ubuntu@34.210.33.150 -i /tmp/pipeline.pem --chef-license=accept || true'
       }
     }
 
-    stage('HARDENING CONFORMANCE OPENSCAP') {
+    stage('HARDENING COMPLIANCE OPENSCAP') {
       steps {
         sshagent(['prod']) {
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "wget https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.bionic.cve.oval.xml /tmp/com.ubuntu.bionic.cve.oval.xml"'
@@ -89,6 +92,25 @@ pipeline {
         }
       }
     }
+
+    stage('DEPLOY PROD') {
+      steps {
+        sshagent(['prod']) {
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "sudo bash /prod/apache-tomcat-8.5.45/bin/shutdown.sh"'
+          sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/cardiff-secure-cicd-pipeline/webgoat-container/target/*.war ubuntu@34.210.33.150:/prod/apache-tomcat-8.5.45/webapps/webapp.war'
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "sudo bash /prod/apache-tomcat-8.5.45/bin/startup.sh"'
+        }
+      }
+    }
+
+    stage('HARDENING COMPLIANCE INSPEC') { 
+      steps {
+	sh 'echo "[prod]" > inventory.ini'
+	sh 'echo "34.210.33.150 ansible_user=ubuntu  ansible_ssh_private_key_file=/tmp/pipeline.pem" >> inventory.ini'
+	sh 'ansible-galaxy install dev-sec.os-hardening'
+	sh 'ansible-playbook -i inventory.ini ansible-hardening.yml'
+      }
+    }  
 
   }
   
