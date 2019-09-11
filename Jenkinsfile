@@ -95,6 +95,21 @@ pipeline {
       }
     }
 
+    stage('HARDENING QA PATCH') { 
+      steps {
+	sh 'echo "[prod]" > inventory.ini'
+	sh 'echo "34.210.33.150 ansible_user=ubuntu  ansible_ssh_private_key_file=/tmp/pipeline.pem" >> inventory.ini'
+	sh 'ansible-galaxy install dev-sec.os-hardening'
+	sh 'ansible-playbook -i inventory.ini ansible-hardening.yml'
+      }
+    }  
+
+    stage('COMMIT APPROVAL'){
+      steps {
+         input "Deploy to Prod?"
+      }
+    }
+	  
     stage('DEPLOY PROD') {
       steps {
         sshagent(['prod']) {
@@ -104,15 +119,6 @@ pipeline {
         }
       }
     }
-
-    stage('HARDENING COMPLIANCE INSPEC') { 
-      steps {
-	sh 'echo "[prod]" > inventory.ini'
-	sh 'echo "34.210.33.150 ansible_user=ubuntu  ansible_ssh_private_key_file=/tmp/pipeline.pem" >> inventory.ini'
-	sh 'ansible-galaxy install dev-sec.os-hardening'
-	sh 'ansible-playbook -i inventory.ini ansible-hardening.yml'
-      }
-    }  
 
   }
   
