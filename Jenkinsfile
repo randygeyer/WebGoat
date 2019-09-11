@@ -21,6 +21,7 @@ pipeline {
         sh 'wget "https://raw.githubusercontent.com/cmarcond/WebGoat-1/master/owasp-dependency-check.sh"'
         sh 'chmod +x owasp-dependency-check.sh'
         sh 'bash owasp-dependency-check.sh'
+	sh 'cat /var/lib/jenkins/OWASP-Dependency-Check/reports/dependency-check-report.html'
       }
     }
 	  
@@ -91,6 +92,7 @@ pipeline {
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "wget -P /tmp/ https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.bionic.cve.oval.xml"'
 	  sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "oscap oval eval --results /tmp/oscap_results.xml --report /tmp/oscap_report.html /tmp/com.ubuntu.bionic.cve.oval.xml"'
           sh 'scp -o StrictHostKeyChecking=no ubuntu@34.210.33.150:/tmp/oscap_report.html oscap_results.html'
+	  sh 'sh 'cat oscap_results.html'
         }
       }
     }
