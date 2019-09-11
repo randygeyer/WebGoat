@@ -39,8 +39,10 @@ pipeline {
       }
     }
 
-    stage('Deploy approval'){
-      input "Deploy to QA?"
+    stage('COMMIT APPROVAL'){
+      steps {
+         input "Deploy to QA?"
+      }
     }
   
     stage('DEPLOY QA') {
