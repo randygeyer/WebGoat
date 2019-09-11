@@ -76,7 +76,7 @@ pipeline {
 
     stage('HARDENING CONFORMANCE INSPEC') { 
       steps {
-	sh 'inspec exec https://github.com/dev-sec/linux-baseline -t ssh://ubuntu@34.210.33.150'
+	sh 'inspec exec https://github.com/dev-sec/linux-baseline -t ssh://ubuntu@34.210.33.150 --chef-license=accept'
       }
     }
 
