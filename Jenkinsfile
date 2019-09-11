@@ -104,7 +104,7 @@ pipeline {
       }
     }  
 
-    stage('COMMIT APPROVAL'){
+    stage('QA APPROVAL'){
       steps {
          input "Deploy to Prod?"
       }
