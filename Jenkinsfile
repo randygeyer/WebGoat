@@ -80,13 +80,29 @@ pipeline {
       }
     }
 
-    stage('HARDENING COMPLIANCE INSPEC') { 
+    stage('QA APPROVAL'){
+      steps {
+         input "Deploy to Prod?"
+      }
+    }
+
+    stage('HARDENING PROD') { 
+      steps {
+	sh 'echo "[prod]" > inventory.ini'
+	sh 'echo "34.210.33.150 ansible_user=ubuntu  ansible_ssh_private_key_file=/tmp/pipeline.pem" >> inventory.ini'
+	sh 'ansible-galaxy install dev-sec.os-hardening'
+	sh 'ansible-playbook -i inventory.ini ansible-hardening.yml'
+      }
+    }  
+	  
+
+    stage('COMPLIANCE PROD INSPEC') { 
       steps {
 	sh 'inspec exec https://github.com/dev-sec/linux-baseline -t ssh://ubuntu@34.210.33.150 -i /tmp/pipeline.pem --chef-license=accept || true'
       }
     }
 
-    stage('HARDENING COMPLIANCE OPENSCAP') {
+    stage('COMPLIANCE PROD OPENSCAP') {
       steps {
         sshagent(['prod']) {
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "wget -P /tmp/ https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.bionic.cve.oval.xml"'
@@ -97,21 +113,6 @@ pipeline {
       }
     }
 
-    stage('HARDENING QA PATCH') { 
-      steps {
-	sh 'echo "[prod]" > inventory.ini'
-	sh 'echo "34.210.33.150 ansible_user=ubuntu  ansible_ssh_private_key_file=/tmp/pipeline.pem" >> inventory.ini'
-	sh 'ansible-galaxy install dev-sec.os-hardening'
-	sh 'ansible-playbook -i inventory.ini ansible-hardening.yml'
-      }
-    }  
-
-    stage('QA APPROVAL'){
-      steps {
-         input "Deploy to Prod?"
-      }
-    }
-	  
     stage('DEPLOY PROD') {
       steps {
         sshagent(['prod']) {
