@@ -81,10 +81,12 @@ pipeline {
     }
 
     stage('HARDENING CONFORMANCE OPENSCAP') {
-      sshagent(['prod']) {
+      steps {
+        sshagent(['prod']) {
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "wget https://people.canonical.com/~ubuntu-security/oval/com.ubuntu.bionic.cve.oval.xml /tmp/com.ubuntu.bionic.cve.oval.xml"'
 	  sh 'ssh -o StrictHostKeyChecking=no ubuntu@34.210.33.150 "oscap oval eval --results /tmp/oscap_results.xml --report /tmp/oscap_report.html /tmp/com.ubuntu.bionic.cve.oval.xml"'
           sh 'scp -o StrictHostKeyChecking=no ubuntu@34.210.33.150:/tmp/oscap_report.html oscap_results.html'
+        }
       }
     }
 
