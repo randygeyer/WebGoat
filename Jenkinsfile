@@ -28,7 +28,7 @@ pipeline {
     stage ('SAST SONAQUBE') {
       steps {
         withSonarQubeEnv('sonarqube') {
-          sh 'mvn clean sonar:sonar'
+          sh 'mvn clean package sonar:sonar'
           sh 'cat target/sonar/report-task.txt'
         }
       }
